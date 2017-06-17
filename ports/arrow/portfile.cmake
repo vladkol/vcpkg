@@ -12,12 +12,16 @@ vcpkg_from_github(
     HEAD_REF master
 )
 
-
 set(CPP_SOURCE_PATH "${SOURCE_PATH}/cpp")
+
+set(ENV{GFLAGS_HOME} ${CURRENT_INSTALLED_DIR})
 
 vcpkg_configure_cmake(
     SOURCE_PATH ${CPP_SOURCE_PATH}
-    OPTIONS -DARROW_BUILD_TESTS=off
+    OPTIONS
+        -DARROW_BUILD_TESTS=off
+        -DFLATBUFFERS_HOME=${CURRENT_INSTALLED_DIR}
+        -DRAPIDJSON_HOME=${CURRENT_INSTALLED_DIR}
 )
 
 vcpkg_install_cmake()
