@@ -1,6 +1,5 @@
 include(vcpkg_common_functions)
 
-set(GIT_REF 44b7c5b918a08ad561c63e9d28beecb40c10ebca)
 vcpkg_from_github(
   OUT_SOURCE_PATH SOURCE_PATH
   REPO OlafvdSpek/ctemplate
@@ -16,7 +15,7 @@ vcpkg_find_acquire_program(PYTHON2)
 vcpkg_apply_patches(
   SOURCE_PATH ${SOURCE_PATH}
   PATCHES
-  ${CMAKE_CURRENT_LIST_DIR}/fix-msvc.patch
+    ${CMAKE_CURRENT_LIST_DIR}/fix-msvc.patch
 )
 
 vcpkg_configure_cmake(
