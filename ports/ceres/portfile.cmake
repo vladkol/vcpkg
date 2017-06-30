@@ -27,6 +27,9 @@ vcpkg_from_github(
     HEAD_REF master
 )
 
+# Ninja crash compiler with error:
+# "fatal error C1001: An internal error has occurred in the compiler. (compiler file 'f:\dd\vctools\compiler\utc\src\p2\main.c', line 255)"
+
 vcpkg_configure_cmake(
     SOURCE_PATH ${SOURCE_PATH}
     OPTIONS
@@ -36,22 +39,26 @@ vcpkg_configure_cmake(
         -DCXSPARSE=ON
         -DEIGENSPARSE=ON
         -DSUITESPARSE=ON
-        -DBLAS_LIBRARIES=${CURRENT_INSTALLED_DIR}/lib/openblas.lib
-        -DCXSPARSE_INCLUDE_DIR=${SUITESPARSE_INCLUDE_DIR}
-        -DCXSPARSE_LIBRARY=${CURRENT_INSTALLED_DIR}/lib/libcxsparse.lib
-        -DEIGEN_INCLUDE_DIR=${CURRENT_INSTALLED_DIR}/include/eigen3
+        -DGFLAGS_PREFER_EXPORTED_GFLAGS_CMAKE_CONFIGURATION=OFF # TheiaSfm doesn't work well with this
+        -DGLOG_PREFER_EXPORTED_GLOG_CMAKE_CONFIGURATION=OFF # TheiaSfm doesn't work well with this
         -DGFLAGS_INCLUDE_DIR=${CURRENT_INSTALLED_DIR}/include
-        -DGFLAGS_LIBRARY=${CURRENT_INSTALLED_DIR}/lib/gflags.lib
         -DGLOG_INCLUDE_DIR=${CURRENT_INSTALLED_DIR}/include
-        -DGLOG_LIBRARY=${CURRENT_INSTALLED_DIR}/lib/glog.lib
-        -DLAPACK_LIBRARIES=${CURRENT_INSTALLED_DIR}/lib/lapack.lib
-        -DMETIS_LIBRARY=${CURRENT_INSTALLED_DIR}/lib/metis.lib
+        -DCXSPARSE_INCLUDE_DIR=${CURRENT_INSTALLED_DIR}/include/suitesparse
         -DSUITESPARSE_INCLUDE_DIR_HINTS=${CURRENT_INSTALLED_DIR}/include/suitesparse
     OPTIONS_RELEASE
+        -DGFLAGS_LIBRARY=${CURRENT_INSTALLED_DIR}/lib/gflags.lib
+        -DGLOG_LIBRARY=${CURRENT_INSTALLED_DIR}/lib/glog.lib
         -DSUITESPARSE_LIBRARY_DIR_HINTS=${CURRENT_INSTALLED_DIR}/lib
+        -DBLAS_LIBRARIES=${CURRENT_INSTALLED_DIR}/lib/openblas.lib
+        -DLAPACK_LIBRARIES=${CURRENT_INSTALLED_DIR}/lib/lapack.lib
+        -DMETIS_LIBRARY=${CURRENT_INSTALLED_DIR}/lib/metis.lib
     OPTIONS_DEBUG
-        -DSUITESPARSEQR_LIBRARY=${CURRENT_INSTALLED_DIR}/debug/lib/libspqrd.lib
+        -DGFLAGS_LIBRARY=${CURRENT_INSTALLED_DIR}/debug/lib/gflags.lib
+        -DGLOG_LIBRARY=${CURRENT_INSTALLED_DIR}/debug/lib/glog.lib
         -DSUITESPARSE_LIBRARY_DIR_HINTS=${CURRENT_INSTALLED_DIR}/debug/lib
+        -DBLAS_LIBRARIES=${CURRENT_INSTALLED_DIR}/debug/lib/openblas.lib
+        -DLAPACK_LIBRARIES=${CURRENT_INSTALLED_DIR}/debug/lib/lapack.lib
+        -DMETIS_LIBRARY=${CURRENT_INSTALLED_DIR}/debug/lib/metis.lib
 )
 
 vcpkg_install_cmake()
@@ -60,12 +67,15 @@ vcpkg_fixup_cmake_targets(CONFIG_PATH "CMake")
 
 vcpkg_copy_pdbs()
 
-#clean
+# Changes target search path
+file(READ ${CURRENT_PACKAGES_DIR}/share/ceres/CeresConfig.cmake CERES_TARGETS)
+string(REPLACE "get_filename_component(CURRENT_ROOT_INSTALL_DIR\n    \${CERES_CURRENT_CONFIG_DIR}/../"
+               "get_filename_component(CURRENT_ROOT_INSTALL_DIR\n    \${CERES_CURRENT_CONFIG_DIR}/../../" CERES_TARGETS "${CERES_TARGETS}")
+file(WRITE ${CURRENT_PACKAGES_DIR}/share/ceres/CeresConfig.cmake "${CERES_TARGETS}")
+
+# Clean
 file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/debug/include)
 file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/debug/share)
-file(REMOVE ${CURRENT_PACKAGES_DIR}/share/ceres/FindEigen.cmake)
-file(REMOVE ${CURRENT_PACKAGES_DIR}/share/ceres/FindGflags.cmake)
-file(REMOVE ${CURRENT_PACKAGES_DIR}/share/ceres/FindGlog.cmake)
 
 # Handle copyright of suitesparse and metis
 file(COPY ${SOURCE_PATH}/LICENSE DESTINATION ${CURRENT_PACKAGES_DIR}/share/ceres)
