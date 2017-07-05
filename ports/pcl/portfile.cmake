@@ -11,11 +11,11 @@
 #
 
 include(vcpkg_common_functions)
-set(SOURCE_PATH ${CURRENT_BUILDTREES_DIR}/src/pcl-pcl-1.8.0)
+set(SOURCE_PATH ${CURRENT_BUILDTREES_DIR}/src/pcl-pcl-1.8.1rc1)
 vcpkg_download_distfile(ARCHIVE
-    URLS "https://github.com/PointCloudLibrary/pcl/archive/pcl-1.8.0.zip"
-    FILENAME "pcl-1.8.0.zip"
-    SHA512 932f7e2101707003712e53d9310c6ba8304b8d325997a71a45d052c329cd9465f1d390c6c53a11bcb01d65e808c7701452ea06f116a0bd779d8098fdf3246ca8
+    URLS "https://github.com/PointCloudLibrary/pcl/archive/pcl-1.8.1rc1.zip"
+    FILENAME "pcl-pcl-1.8.1rc1.zip"
+    SHA512 7976dfdb629130c7f6cf60c2f46ef8faf11dfef1280ae48bfe1154141d2d49a4857b90c6e04429cc400acb33b0cef142931c23cd10c2e1fa13e2613d2b2b533d
 )
 vcpkg_extract_source_archive(${ARCHIVE})
 
@@ -26,13 +26,6 @@ vcpkg_apply_patches(
             "${CMAKE_CURRENT_LIST_DIR}/find_flann.patch"
             "${CMAKE_CURRENT_LIST_DIR}/find_qhull.patch"
             "${CMAKE_CURRENT_LIST_DIR}/find_openni2.patch"
-            # Fix for PCL 1.8.0
-            "${CMAKE_CURRENT_LIST_DIR}/1635.patch"
-            "${CMAKE_CURRENT_LIST_DIR}/1788.patch"
-            "${CMAKE_CURRENT_LIST_DIR}/1823.patch"
-            "${CMAKE_CURRENT_LIST_DIR}/1830.patch"
-            "${CMAKE_CURRENT_LIST_DIR}/1855.patch"
-            "${CMAKE_CURRENT_LIST_DIR}/1856.patch"
 )
 
 if(VCPKG_CRT_LINKAGE STREQUAL "dynamic")
@@ -50,6 +43,7 @@ vcpkg_configure_cmake(
         -DBUILD_tools=OFF
         # PCL
         -DPCL_BUILD_WITH_BOOST_DYNAMIC_LINKING_WIN32=${CRT_LINKAGE}
+        -DPCL_BUILD_WITH_FLANN_DYNAMIC_LINKING_WIN32=${CRT_LINKAGE}
         -DPCL_SHARED_LIBS=${CRT_LINKAGE}
         # WITH
         -DWITH_CUDA=OFF
@@ -64,7 +58,6 @@ vcpkg_configure_cmake(
 
 vcpkg_install_cmake()
 
-file(REMOVE ${CURRENT_PACKAGES_DIR}/bin/pcl_2d_release.dll ${CURRENT_PACKAGES_DIR}/debug/bin/pcl_2d_debug.dll)
 file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/debug/include)
 file(REMOVE_RECURSE ${CURRENT_PACKAGES_DIR}/debug/share)
 file(COPY ${SOURCE_PATH}/LICENSE.txt DESTINATION ${CURRENT_PACKAGES_DIR}/share/pcl)
