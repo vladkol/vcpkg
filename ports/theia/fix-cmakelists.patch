@@ -28,9 +28,9 @@ index 9c1b150..367fbbc 100644
 -  ${stlplus3_SOURCE_DIR}
 -  ${vlfeat_SOURCE_DIR}
 -  ${visual_sfm_SOURCE_DIR})
-+if (${BUILD_TESTING})
++if (BUILD_TESTING)
 +  add_subdirectory(libraries/gtest)
-+endif (${BUILD_TESTING})
++endif (BUILD_TESTING)
 +
 +# AKAZE feature extractor.
 +add_subdirectory(libraries/akaze)
