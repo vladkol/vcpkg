@@ -17,14 +17,14 @@ set(MSMPI_EXPECTED_FULL_VERSION "8.0.12438.0")
 if(EXISTS ${SYSTEM_MPIEXEC_FILEPATH})
     set(MPIEXEC_VERSION_LOGNAME "mpiexec-version")
     vcpkg_execute_required_process(
-        COMMAND ${SYSTEM_MPIEXEC_FILEPATH}
+        COMMAND ${SYSTEM_MPIEXEC_FILEPATH} /?
         WORKING_DIRECTORY ${CURRENT_BUILDTREES_DIR}
         LOGNAME ${MPIEXEC_VERSION_LOGNAME}
     )
     file(READ ${CURRENT_BUILDTREES_DIR}/${MPIEXEC_VERSION_LOGNAME}-out.log MPIEXEC_OUTPUT)
 
-    if(${MPIEXEC_OUTPUT} MATCHES "\\[Version ([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)\\]")
-        if(NOT ${CMAKE_MATCH_1} STREQUAL ${MSMPI_EXPECTED_FULL_VERSION})
+    if(MPIEXEC_OUTPUT MATCHES "\\[Version ([0-9]+\\.[0-9]+\\.[0-9]+\\.[0-9]+)\\]")
+        if(NOT CMAKE_MATCH_1 STREQUAL ${MSMPI_EXPECTED_FULL_VERSION})
             message(FATAL_ERROR
                 "  The version of the installed MSMPI redistributable packages does not match the version to be installed\n"
                 "  Expected version: ${MSMPI_EXPECTED_FULL_VERSION}\n"
@@ -57,7 +57,7 @@ file(TO_NATIVE_PATH "${SOURCE_PATH}/sdk" SDK_SOURCE_DIR)
 file(TO_NATIVE_PATH "${CURRENT_BUILDTREES_DIR}/msiexec-${TARGET_TRIPLET}.log" MSIEXEC_LOG_PATH)
 
 vcpkg_execute_required_process(
-    COMMAND msiexec /a ${SDK_ARCHIVE} /qn TARGETDIR=${SDK_SOURCE_DIR} /log "${MSIEXEC_LOG_PATH}"
+    COMMAND msiexec /a "${SDK_ARCHIVE}" /qn "TARGETDIR=${SDK_SOURCE_DIR}" /log "${MSIEXEC_LOG_PATH}"
     WORKING_DIRECTORY ${CURRENT_BUILDTREES_DIR}
     LOGNAME extract-sdk
 )
@@ -73,23 +73,23 @@ file(INSTALL
         "${SOURCE_INCLUDE_PATH}/mpio.h"
         "${SOURCE_INCLUDE_PATH}/mspms.h"
         "${SOURCE_INCLUDE_PATH}/pmidbg.h"
-        "${SOURCE_INCLUDE_PATH}/${TRIPLET_SYSTEM_ARCH}/mpifptr.h"
+        "${SOURCE_INCLUDE_PATH}/${VCPKG_TARGET_ARCHITECTURE}/mpifptr.h"
     DESTINATION
         ${CURRENT_PACKAGES_DIR}/include
 )
 
 # Install release libraries
 file(INSTALL
-        "${SOURCE_LIB_PATH}/${TRIPLET_SYSTEM_ARCH}/msmpi.lib"
-        "${SOURCE_LIB_PATH}/${TRIPLET_SYSTEM_ARCH}/msmpifec.lib"
-        "${SOURCE_LIB_PATH}/${TRIPLET_SYSTEM_ARCH}/msmpifmc.lib"
+        "${SOURCE_LIB_PATH}/${VCPKG_TARGET_ARCHITECTURE}/msmpi.lib"
+        "${SOURCE_LIB_PATH}/${VCPKG_TARGET_ARCHITECTURE}/msmpifec.lib"
+        "${SOURCE_LIB_PATH}/${VCPKG_TARGET_ARCHITECTURE}/msmpifmc.lib"
     DESTINATION
         ${CURRENT_PACKAGES_DIR}/lib
 )
-if(${TRIPLET_SYSTEM_ARCH} STREQUAL "x86")
+if(VCPKG_TARGET_ARCHITECTURE STREQUAL "x86")
     file(INSTALL
-            "${SOURCE_LIB_PATH}/${TRIPLET_SYSTEM_ARCH}/msmpifes.lib"
-            "${SOURCE_LIB_PATH}/${TRIPLET_SYSTEM_ARCH}/msmpifms.lib"
+            "${SOURCE_LIB_PATH}/${VCPKG_TARGET_ARCHITECTURE}/msmpifes.lib"
+            "${SOURCE_LIB_PATH}/${VCPKG_TARGET_ARCHITECTURE}/msmpifms.lib"
         DESTINATION
             ${CURRENT_PACKAGES_DIR}/lib
     )
@@ -99,16 +99,16 @@ endif()
 # NOTE: since the binary distribution does not include any debug libraries we simply install the release libraries
 SET(VCPKG_POLICY_ONLY_RELEASE_CRT enabled)
 file(INSTALL
-        "${SOURCE_LIB_PATH}/${TRIPLET_SYSTEM_ARCH}/msmpi.lib"
-        "${SOURCE_LIB_PATH}/${TRIPLET_SYSTEM_ARCH}/msmpifec.lib"
-        "${SOURCE_LIB_PATH}/${TRIPLET_SYSTEM_ARCH}/msmpifmc.lib"
+        "${SOURCE_LIB_PATH}/${VCPKG_TARGET_ARCHITECTURE}/msmpi.lib"
+        "${SOURCE_LIB_PATH}/${VCPKG_TARGET_ARCHITECTURE}/msmpifec.lib"
+        "${SOURCE_LIB_PATH}/${VCPKG_TARGET_ARCHITECTURE}/msmpifmc.lib"
     DESTINATION
         ${CURRENT_PACKAGES_DIR}/debug/lib
 )
-if(${TRIPLET_SYSTEM_ARCH} STREQUAL "x86")
+if(VCPKG_TARGET_ARCHITECTURE STREQUAL "x86")
     file(INSTALL
-            "${SOURCE_LIB_PATH}/${TRIPLET_SYSTEM_ARCH}/msmpifes.lib"
-            "${SOURCE_LIB_PATH}/${TRIPLET_SYSTEM_ARCH}/msmpifms.lib"
+            "${SOURCE_LIB_PATH}/${VCPKG_TARGET_ARCHITECTURE}/msmpifes.lib"
+            "${SOURCE_LIB_PATH}/${VCPKG_TARGET_ARCHITECTURE}/msmpifms.lib"
         DESTINATION
             ${CURRENT_PACKAGES_DIR}/debug/lib
     )
